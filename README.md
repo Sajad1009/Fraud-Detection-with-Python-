@@ -328,6 +328,147 @@ plt.show()
 ```
 ![](PIC6.png)
 
+Now lets convert back the pandas to spark.sql data frame and add index to keep trace of the rows 
+
+```
+dfff = spark.createDataFrame(new_df)
+from pyspark.sql.functions import *
+from pyspark.sql.window import Window
+win = Window().orderBy('Time')
+dfff = dfff.withColumn("idx", row_number().over(win))
+```
+# Machine learning 
+
+Now lets strat with machine learning. First we have to train our model in the new data 
+we need to import some libraries first
+
+from pyspark.ml import Pipeline
+from pyspark.ml.classification import GBTClassifier
+from pyspark.ml.feature import VectorIndexer, VectorAssembler
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+from pyspark.ml.linalg import DenseVector
+
+```
+Then we should divide the data to traning sets and test sets 
+
+```
+training_df = dfff.rdd.map(lambda x: (DenseVector(x[0:29]),x[30],x[31])) # Dense Vector required in spark to train the data
+training_df = spark.createDataFrame(training_df,["features","label","index"])
+training_df = training_df.select("index","features","label")
+train_data, test_data = training_df.randomSplit([.8,.2],seed=1234)
+```
+we count the training and testing data 
+
+```
+train_data.groupBy("label").count().show()
+-----+-----+
+|label|count|
++-----+-----+
+|    0|  411|
+|    1|  369|
++-----+-----+
+&
+test_data.groupBy("label").count().show()
+
++-----+-----+
+|label|count|
++-----+-----+
+|    0|   78|
+|    1|   88|
++-----+-----+
+
+```
+
+Now we using Classifiers -- I am going to use GBTClassifier-- However you free to use any type of Classifiers such as LogisticR and other types and compare your results with the one found here.
+
+
+```
+gbt = GBTClassifier(featuresCol="features", maxIter=100,maxDepth=8)
+model = gbt.fit(train_data)
+predictions = model.transform(test_data)
+predictions.groupBy("prediction").count().show()
+
++----------+-----+
+|prediction|count|
++----------+-----+
+|       0.0|   77|
+|       1.0|   89|
++----------+-----+
+
+```
+
+```
+evaluator = BinaryClassificationEvaluator()
+evaluator.evaluate(predictions)
+```
+The results :
+
+0.986451048951049
+
+```
+predictions = predictions.withColumn("fraudPrediction",when((predictions.label==1)&(predictions.prediction==1),1).otherwise(0))
+predictions.groupBy("fraudPrediction").count().show()
++---------------+-----+
+|fraudPrediction|count|
++---------------+-----+
+|              1|   86|
+|              0|   80|
++---------------+-----+
+```
+
+```
+predictions.groupBy("label").count().show()
+
++-----+-----+
+|label|count|
++-----+-----+
+|    0|   78|
+|    1|   88|
++-----+-----+
+
+```
+
+Number of fraud records identified = 96
+Number of Total fraud records in test dataset = 116
+Percentage of fraud records identified correctly (Accuracy to identify fraud) = 
+----------------------------------------------------------------------------------------------------------------------------------------
+```
+from pyspark.sql.functions import col
+accurateFraud = predictions.groupBy("fraudPrediction").count().where(predictions.fraudPrediction==1).head()[1]
+totalFraud = predictions.groupBy("label").count().where(predictions.label==1).head()[1]
+FraudPredictionAccuracy = (accurateFraud/totalFraud)*100
+FraudPredictionAccuracy
+
+The results of  Accuracy: 
+
+97.72727272727273
+
+```
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Calculating Confusion matrix
+
+```
+tp = predictions[(predictions.label == 1) & (predictions.prediction == 1)].count()
+tn = predictions[(predictions.label == 0) & (predictions.prediction == 0)].count()
+fp = predictions[(predictions.label == 0) & (predictions.prediction == 1)].count()
+fn = predictions[(predictions.label == 1) & (predictions.prediction == 0)].count()
+
+
+print("True Positive: ",tp,"\nTrue Negative: ",tn,"\nFalse Positive: ",fp,"\nFalse Negative: ",fn)
+print("Recall: ",tp/(tp+fn))
+print("Precision: ", tp/(tp+fp))
+
+```
+### True Positive:  86 
+### True Negative:  75 
+### False Positive:  3 
+### False Negative:  2
+### Recall:  0.9772727272727273
+### Precision:  0.9662921348314607
+
+
+
 
 
 
