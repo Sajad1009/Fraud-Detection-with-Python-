@@ -3,9 +3,6 @@ Today’s online payments experience is powered by dozens of unique tools —�
 and checkout tools. In the enterprise ecommerce space, this approach is called “layering,” in which business layer on suites
 of different tools to create “robust” payments and fraud detection stacks.
 
-![](438-1540129690.jpg)
-
-
 Machine Learning algorithms usually work best when the different classes contained in the dataset are more or less equally present.
 If there are few cases of fraud, then there's little data to learn how to identify them. This is known as class imbalance,
 and it's one of the main challenges of fraud detection.
@@ -21,9 +18,9 @@ are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between eac
 The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning.
 Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
 
-### We going to build the model in top of pyspark built with hadoop google cloud clusters make sure you have spark installed in your remote clusters or your local machine. 
+#### We going to build the model in top of pyspark built with hadoop google cloud clusters make sure you have spark installed in your remote clusters or your local machine. 
 
-### You can have alook at the link below which could helo you with installing pyspark on google cloud 
+#### You can have alook at the link below which could helo you with installing pyspark on google cloud 
 
 https://medium.com/@ankycheng/set-up-pyspark-environment-on-goolge-cloud-platform-853b629f1206
 
@@ -471,7 +468,11 @@ print("Precision: ", tp/(tp+fp))
 
 
 
-
+References:
+Hands on Machine Learning with Scikit-Learn & TensorFlow by Aurélien Géron (O'Reilly). CopyRight 2017 Aurélien Géron
+Machine Learning - Over-& Undersampling - Python/ Scikit/ Scikit-Imblearn by Coding-Maniac
+auprc, 5-fold c-v, and resampling methods by Jeremy Lane
+janio bachmann credit-fraud-dealing-with-imbalanced-datasets
 
 
 
