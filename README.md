@@ -336,12 +336,14 @@ from pyspark.sql.functions import *
 from pyspark.sql.window import Window
 win = Window().orderBy('Time')
 dfff = dfff.withColumn("idx", row_number().over(win))
+
 ```
 # Machine learning 
 
 Now lets strat with machine learning. First we have to train our model in the new data 
 we need to import some libraries first
 
+```
 from pyspark.ml import Pipeline
 from pyspark.ml.classification import GBTClassifier
 from pyspark.ml.feature import VectorIndexer, VectorAssembler
@@ -349,6 +351,8 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml.linalg import DenseVector
 
 ```
+
+
 Then we should divide the data to traning sets and test sets 
 
 ```
@@ -356,8 +360,9 @@ training_df = dfff.rdd.map(lambda x: (DenseVector(x[0:29]),x[30],x[31])) # Dense
 training_df = spark.createDataFrame(training_df,["features","label","index"])
 training_df = training_df.select("index","features","label")
 train_data, test_data = training_df.randomSplit([.8,.2],seed=1234)
+
 ```
-we count the training and testing data 
+we count the training and the testing data 
 
 ```
 train_data.groupBy("label").count().show()
@@ -380,8 +385,6 @@ test_data.groupBy("label").count().show()
 ```
 
 Now we using Classifiers -- I am going to use GBTClassifier-- However you free to use any type of Classifiers such as LogisticR and other types and compare your results with the one found here.
-
-
 ```
 gbt = GBTClassifier(featuresCol="features", maxIter=100,maxDepth=8)
 model = gbt.fit(train_data)
