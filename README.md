@@ -351,8 +351,6 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml.linalg import DenseVector
 
 ```
-
-
 Then we should divide the data to traning sets and test sets 
 
 ```
@@ -434,6 +432,7 @@ predictions.groupBy("label").count().show()
 Number of fraud records identified = 96
 Number of Total fraud records in test dataset = 116
 Percentage of fraud records identified correctly (Accuracy to identify fraud) = 
+
 ----------------------------------------------------------------------------------------------------------------------------------------
 ```
 from pyspark.sql.functions import col
@@ -463,12 +462,12 @@ print("Recall: ",tp/(tp+fn))
 print("Precision: ", tp/(tp+fp))
 
 ```
-### True Positive:  86 
-### True Negative:  75 
-### False Positive:  3 
-### False Negative:  2
-### Recall:  0.9772727272727273
-### Precision:  0.9662921348314607
+##### True Positive:  86 
+##### True Negative:  75 
+##### False Positive:  3 
+##### False Negative:  2
+##### Recall:  0.9772727272727273
+##### Precision:  0.9662921348314607
 
 
 
